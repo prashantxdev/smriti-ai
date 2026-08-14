@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 
 type Mode = "signin" | "signup";
 
-type AuthSearch = { mode: Mode; redirect: string | undefined };
+type AuthSearch = { mode?: Mode; redirect?: string | undefined };
 
 function sanitizeRedirect(value: unknown): string | undefined {
   if (typeof value !== "string") return undefined;
