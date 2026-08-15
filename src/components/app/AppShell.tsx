@@ -29,6 +29,7 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { useAccess } from "@/lib/access";
 
 export const APP_NAV = [
   { to: "/dashboard", label: "Today", icon: Home },
@@ -38,15 +39,24 @@ export const APP_NAV = [
   { to: "/people", label: "People", icon: Users },
   { to: "/places", label: "Places", icon: MapPin },
   { to: "/objects", label: "Objects", icon: Package },
-  { to: "/caregivers", label: "Caregivers", icon: Bell },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/caregivers", label: "Caregivers", icon: Bell, area: "caregivers" },
+  { to: "/settings", label: "Settings", icon: Settings, area: "settings" },
 ] as const;
 
 const PRIMARY_MOBILE_NAV = APP_NAV.slice(0, 4);
 
+function useVisibleNav() {
+  const access = useAccess();
+  return APP_NAV.filter((item) => {
+    if (!("area" in item)) return true;
+    return access.data?.can(item.area) ?? false;
+  });
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navItems = useVisibleNav();
 
   useEffect(() => {
     setMenuOpen(false);
@@ -60,7 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Logo size={36} />
         </Link>
         <nav className="mt-8 flex flex-1 flex-col gap-1" aria-label="Application">
-          {APP_NAV.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
@@ -107,6 +117,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 }
 
 function MobileMenu({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const navItems = useVisibleNav();
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetTrigger asChild>
@@ -120,7 +131,7 @@ function MobileMenu({ open, onOpenChange }: { open: boolean; onOpenChange: (v: b
       </SheetTrigger>
       <SheetContent side="bottom" className="rounded-t-3xl">
         <div className="mx-auto mt-4 grid w-full max-w-md grid-cols-2 gap-2 pb-8">
-          {APP_NAV.map((item) => (
+          {navItems.map((item) => (
             <Link
               key={item.to}
               to={item.to}
