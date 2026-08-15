@@ -39,14 +39,22 @@ export function SiteHeader() {
 
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <Button asChild variant="ghost" className="hidden sm:inline-flex">
-            <Link to="/auth">Sign in</Link>
-          </Button>
-          <Button asChild className="rounded-full">
-            <Link to="/auth" search={{ mode: "signup" }}>
-              Get Started
-            </Link>
-          </Button>
+          {signedIn ? (
+            <Button asChild className="rounded-full">
+              <Link to="/dashboard">Open Smriti</Link>
+            </Button>
+          ) : (
+            <>
+              <Button asChild variant="ghost" className="hidden sm:inline-flex">
+                <Link to="/auth">Sign in</Link>
+              </Button>
+              <Button asChild className="rounded-full">
+                <Link to="/auth" search={{ mode: "signup" }}>
+                  Get Started
+                </Link>
+              </Button>
+            </>
+          )}
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="md:hidden" aria-label="Open menu">
