@@ -10,14 +10,28 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as TermsRouteImport } from './routes/terms'
+import { Route as AuthenticatedCaregiversRouteImport } from './routes/_authenticated/caregivers'
+import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedMemoriesRouteImport } from './routes/_authenticated/memories'
+import { Route as AuthenticatedObjectsRouteImport } from './routes/_authenticated/objects'
+import { Route as AuthenticatedPeopleRouteImport } from './routes/_authenticated/people'
+import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
+import { Route as AuthenticatedRecogniseRouteImport } from './routes/_authenticated/recognise'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -40,6 +54,51 @@ const TermsRoute = TermsRouteImport.update({
   path: '/terms',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedCaregiversRoute = AuthenticatedCaregiversRouteImport.update({
+  id: '/caregivers',
+  path: '/caregivers',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedCompanionRoute = AuthenticatedCompanionRouteImport.update({
+  id: '/companion',
+  path: '/companion',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedMemoriesRoute = AuthenticatedMemoriesRouteImport.update({
+  id: '/memories',
+  path: '/memories',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedObjectsRoute = AuthenticatedObjectsRouteImport.update({
+  id: '/objects',
+  path: '/objects',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPeopleRoute = AuthenticatedPeopleRouteImport.update({
+  id: '/people',
+  path: '/people',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
+  id: '/places',
+  path: '/places',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedRecogniseRoute = AuthenticatedRecogniseRouteImport.update({
+  id: '/recognise',
+  path: '/recognise',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -47,6 +106,15 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/caregivers': typeof AuthenticatedCaregiversRoute
+  '/companion': typeof AuthenticatedCompanionRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/memories': typeof AuthenticatedMemoriesRoute
+  '/objects': typeof AuthenticatedObjectsRoute
+  '/people': typeof AuthenticatedPeopleRoute
+  '/places': typeof AuthenticatedPlacesRoute
+  '/recognise': typeof AuthenticatedRecogniseRoute
+  '/settings': typeof AuthenticatedSettingsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -54,25 +122,89 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/caregivers': typeof AuthenticatedCaregiversRoute
+  '/companion': typeof AuthenticatedCompanionRoute
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/memories': typeof AuthenticatedMemoriesRoute
+  '/objects': typeof AuthenticatedObjectsRoute
+  '/people': typeof AuthenticatedPeopleRoute
+  '/places': typeof AuthenticatedPlacesRoute
+  '/recognise': typeof AuthenticatedRecogniseRoute
+  '/settings': typeof AuthenticatedSettingsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/about': typeof AboutRoute
   '/auth': typeof AuthRoute
   '/privacy': typeof PrivacyRoute
   '/terms': typeof TermsRoute
+  '/_authenticated/caregivers': typeof AuthenticatedCaregiversRoute
+  '/_authenticated/companion': typeof AuthenticatedCompanionRoute
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/memories': typeof AuthenticatedMemoriesRoute
+  '/_authenticated/objects': typeof AuthenticatedObjectsRoute
+  '/_authenticated/people': typeof AuthenticatedPeopleRoute
+  '/_authenticated/places': typeof AuthenticatedPlacesRoute
+  '/_authenticated/recognise': typeof AuthenticatedRecogniseRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/about' | '/auth' | '/privacy' | '/terms'
+  fullPaths:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/caregivers'
+    | '/companion'
+    | '/dashboard'
+    | '/memories'
+    | '/objects'
+    | '/people'
+    | '/places'
+    | '/recognise'
+    | '/settings'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/about' | '/auth' | '/privacy' | '/terms'
-  id: '__root__' | '/' | '/about' | '/auth' | '/privacy' | '/terms'
+  to:
+    | '/'
+    | '/about'
+    | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/caregivers'
+    | '/companion'
+    | '/dashboard'
+    | '/memories'
+    | '/objects'
+    | '/people'
+    | '/places'
+    | '/recognise'
+    | '/settings'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/about'
+    | '/auth'
+    | '/privacy'
+    | '/terms'
+    | '/_authenticated/caregivers'
+    | '/_authenticated/companion'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/memories'
+    | '/_authenticated/objects'
+    | '/_authenticated/people'
+    | '/_authenticated/places'
+    | '/_authenticated/recognise'
+    | '/_authenticated/settings'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AboutRoute: typeof AboutRoute
   AuthRoute: typeof AuthRoute
   PrivacyRoute: typeof PrivacyRoute
@@ -86,6 +218,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -116,11 +255,102 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TermsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/caregivers': {
+      id: '/_authenticated/caregivers'
+      path: '/caregivers'
+      fullPath: '/caregivers'
+      preLoaderRoute: typeof AuthenticatedCaregiversRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/companion': {
+      id: '/_authenticated/companion'
+      path: '/companion'
+      fullPath: '/companion'
+      preLoaderRoute: typeof AuthenticatedCompanionRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/memories': {
+      id: '/_authenticated/memories'
+      path: '/memories'
+      fullPath: '/memories'
+      preLoaderRoute: typeof AuthenticatedMemoriesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/objects': {
+      id: '/_authenticated/objects'
+      path: '/objects'
+      fullPath: '/objects'
+      preLoaderRoute: typeof AuthenticatedObjectsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/people': {
+      id: '/_authenticated/people'
+      path: '/people'
+      fullPath: '/people'
+      preLoaderRoute: typeof AuthenticatedPeopleRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/places': {
+      id: '/_authenticated/places'
+      path: '/places'
+      fullPath: '/places'
+      preLoaderRoute: typeof AuthenticatedPlacesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/recognise': {
+      id: '/_authenticated/recognise'
+      path: '/recognise'
+      fullPath: '/recognise'
+      preLoaderRoute: typeof AuthenticatedRecogniseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedCaregiversRoute: typeof AuthenticatedCaregiversRoute
+  AuthenticatedCompanionRoute: typeof AuthenticatedCompanionRoute
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedMemoriesRoute: typeof AuthenticatedMemoriesRoute
+  AuthenticatedObjectsRoute: typeof AuthenticatedObjectsRoute
+  AuthenticatedPeopleRoute: typeof AuthenticatedPeopleRoute
+  AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
+  AuthenticatedRecogniseRoute: typeof AuthenticatedRecogniseRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedCaregiversRoute: AuthenticatedCaregiversRoute,
+  AuthenticatedCompanionRoute: AuthenticatedCompanionRoute,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedMemoriesRoute: AuthenticatedMemoriesRoute,
+  AuthenticatedObjectsRoute: AuthenticatedObjectsRoute,
+  AuthenticatedPeopleRoute: AuthenticatedPeopleRoute,
+  AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
+  AuthenticatedRecogniseRoute: AuthenticatedRecogniseRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AboutRoute: AboutRoute,
   AuthRoute: AuthRoute,
   PrivacyRoute: PrivacyRoute,
