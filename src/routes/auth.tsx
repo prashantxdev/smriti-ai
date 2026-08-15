@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable/index";
+import { smritiAuth } from "@/integrations/smriti/index";
 import { Logo } from "@/components/brand/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -78,11 +78,16 @@ function AuthPage() {
 
       try {
         // Verify the OTP code from the email link
-        const { error } = await supabase.auth.verifyOtp({
-          type: type as "email" | "sms" | "recovery" | "recovery_recovery" | "signup" | "magiclink",
-          token: code,
-          email: email || undefined,
-        });
+        const { error } = email
+          ? await supabase.auth.verifyOtp({
+            type: type as "email" | "signup" | "magiclink" | "recovery",
+            token: code,
+            email,
+          })
+          : await supabase.auth.verifyOtp({
+            type: type as "email" | "signup" | "magiclink" | "recovery",
+            token_hash: code,
+          });
 
         if (error) {
           if (active) {
@@ -167,7 +172,7 @@ function AuthPage() {
   async function handleGoogle() {
     setBusy(true);
     try {
-      const result = await lovable.auth.signInWithOAuth("google", {
+      const result = await smritiAuth.auth.signInWithOAuth("google", {
         redirect_uri: window.location.origin,
       });
       if (result.error) {
@@ -226,7 +231,7 @@ function AuthPage() {
                 {verificationError}
               </p>
               <Button asChild variant="default" className="mt-6 rounded-full">
-                <Link to="/auth?mode=signin">Try signing in</Link>
+                <Link to="/auth" search={{ mode: "signin" }}>Try signing in</Link>
               </Button>
             </div>
           ) : emailSent ? (

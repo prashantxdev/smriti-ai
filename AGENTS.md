@@ -1,10 +1,5 @@
-<!-- LOVABLE:BEGIN -->
+# SMRITI AI — Memory Companion Application
+
 > [!IMPORTANT]
-> This project is connected to [Lovable](https://lovable.dev). Avoid rewriting
-> published git history — force pushing, or rebasing/amending/squashing commits
-> that are already pushed — as it rewrites history on Lovable's side and the
-> user will likely lose their project history.
->
-> Commits you push to the connected branch sync back to Lovable and show up in
-> the editor, so keep the branch in a working state.
-<!-- LOVABLE:END -->
+> **SMRITI AI** is a multimodal memory companion designed for individuals, families, and caregivers.
+> Always maintain clean branding, accessibility, high contrast, and responsive user experiences across all routes and components.
