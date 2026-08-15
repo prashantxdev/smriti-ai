@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ComingSoon, PageHeader } from "@/components/app/PageHeader";
+import { RequireAccess } from "@/lib/access";
 
 export const Route = createFileRoute("/_authenticated/caregivers")({
   head: () => ({
@@ -16,7 +17,9 @@ function Caregivers() {
   return (
     <div>
       <PageHeader title="Caregivers" description="Invite someone you trust and choose exactly what they can see or change." />
-      <ComingSoon note="Caregiver invitations and permissions arrive in a later step." />
+      <RequireAccess area="caregivers">
+        <ComingSoon note="Caregiver invitations and permissions arrive in a later step." />
+      </RequireAccess>
     </div>
   );
 }

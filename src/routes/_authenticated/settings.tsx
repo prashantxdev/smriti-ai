@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ComingSoon, PageHeader } from "@/components/app/PageHeader";
+import { RequireAccess } from "@/lib/access";
 
 export const Route = createFileRoute("/_authenticated/settings")({
   head: () => ({
@@ -16,7 +17,9 @@ function Settings() {
   return (
     <div>
       <PageHeader title="Settings" description="Accessibility, appearance, voice replies and your data controls." />
-      <ComingSoon note="Full preference and data controls arrive in a later step." />
+      <RequireAccess area="settings">
+        <ComingSoon note="Full preference and data controls arrive in a later step." />
+      </RequireAccess>
     </div>
   );
 }
