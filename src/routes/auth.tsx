@@ -48,7 +48,7 @@ function AuthPage() {
   const [busy, setBusy] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
 
-  const destination = redirect ?? "/";
+  const destination = redirect ?? "/dashboard";
   const isSignup = mode === "signup";
 
   useEffect(() => {
