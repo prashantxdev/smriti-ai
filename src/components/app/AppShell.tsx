@@ -155,6 +155,7 @@ function AppHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [email, setEmail] = useState<string | null>(null);
+  const access = useAccess();
 
   useEffect(() => {
     let active = true;
@@ -203,12 +204,14 @@ function AppHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
                 {email ?? "Signed in"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link to="/settings">
-                  <Settings className="size-4" />
-                  Settings
-                </Link>
-              </DropdownMenuItem>
+              {access.data?.can("settings") ? (
+                <DropdownMenuItem asChild>
+                  <Link to="/settings">
+                    <Settings className="size-4" />
+                    Settings
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
               <DropdownMenuItem onSelect={() => void handleSignOut()}>
                 <LogOut className="size-4" />
                 Sign out
