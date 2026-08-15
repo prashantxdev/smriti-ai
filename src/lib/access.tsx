@@ -7,33 +7,45 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Database } from "@/integrations/supabase/types";
 
-type AppRole = Database["public"]["Enums"]["app_role"];
-type CaregiverPermission = Database["public"]["Enums"]["caregiver_permission"];
+export type AppRole = Database["public"]["Enums"]["app_role"];
+export type CaregiverPermission = Database["public"]["Enums"]["caregiver_permission"];
 
-export type AccessArea = "caregivers" | "settings";
+export type AccessArea =
+  | "caregivers"
+  | "settings"
+  | "memories"
+  | "people"
+  | "places"
+  | "objects"
+  | "companion"
+  | "recognise"
+  | "activity";
 
 export type AccessInfo = {
   userId: string | null;
+  userEmail: string | null;
   roles: AppRole[];
-  /** Accepted caregiver links where the signed-in user is the caregiver. */
+  /** Caregiver links where signed-in user is caregiver */
   grantedPermissions: CaregiverPermission[];
   hasAcceptedLink: boolean;
   isOwnerAccount: boolean;
   can: (area: AccessArea) => boolean;
+  canPermission: (permission: CaregiverPermission) => boolean;
 };
 
 /**
  * Loads the signed-in user's roles plus the caregiver permissions assigned to them,
- * and derives which restricted areas they may open.
+ * and derives which restricted areas & actions they may open.
  */
 export function useAccess() {
   return useQuery<AccessInfo>({
     queryKey: ["access", "me"],
-    staleTime: 60_000,
+    staleTime: 30_000,
     queryFn: async () => {
       const { data: userData } = await supabase.auth.getUser();
       const userId = userData.user?.id ?? null;
-      if (!userId) return buildAccess(null, [], []);
+      const userEmail = userData.user?.email ?? null;
+      if (!userId) return buildAccess(null, null, [], []);
 
       const [rolesRes, linksRes] = await Promise.all([
         supabase.from("user_roles").select("role").eq("user_id", userId),
@@ -50,33 +62,62 @@ export function useAccess() {
           .filter((p: { enabled: boolean }) => p.enabled)
           .map((p: { permission: CaregiverPermission }) => p.permission),
       );
-      return buildAccess(userId, roles, permissions, (linksRes.data ?? []).length > 0);
+      return buildAccess(userId, userEmail, roles, permissions, (linksRes.data ?? []).length > 0);
     },
   });
 }
 
 function buildAccess(
   userId: string | null,
+  userEmail: string | null,
   roles: AppRole[],
   grantedPermissions: CaregiverPermission[],
   hasAcceptedLink = false,
 ): AccessInfo {
   const isAdmin = roles.includes("admin");
-  // Someone who holds a personal account (role "user") owns their own memory library.
-  const isOwnerAccount = roles.includes("user") || isAdmin;
+  // Owner accounts hold role 'user' or 'admin'
+  const isOwnerAccount = roles.includes("user") || isAdmin || roles.length === 0;
 
   function can(area: AccessArea) {
     if (!userId) return false;
     if (isAdmin || isOwnerAccount) return true;
-    if (area === "caregivers") return hasAcceptedLink;
-    if (area === "settings") return grantedPermissions.includes("VIEW_ACTIVITY");
+    if (area === "caregivers") return true;
+    if (area === "settings") return true;
+    if (area === "memories") return grantedPermissions.includes("VIEW_MEMORIES");
+    if (area === "people") return grantedPermissions.includes("VIEW_MEMORIES") || grantedPermissions.includes("MANAGE_PEOPLE");
+    if (area === "places" || area === "objects") return grantedPermissions.includes("VIEW_MEMORIES");
+    if (area === "companion" || area === "recognise") return grantedPermissions.includes("VIEW_MEMORIES");
+    if (area === "activity") return grantedPermissions.includes("VIEW_ACTIVITY");
     return false;
   }
 
-  return { userId, roles, grantedPermissions, hasAcceptedLink, isOwnerAccount, can };
+  function canPermission(permission: CaregiverPermission) {
+    if (!userId) return false;
+    if (isAdmin || isOwnerAccount) return true;
+    return grantedPermissions.includes(permission);
+  }
+
+  return {
+    userId,
+    userEmail,
+    roles,
+    grantedPermissions,
+    hasAcceptedLink,
+    isOwnerAccount,
+    can,
+    canPermission,
+  };
 }
 
-export function RequireAccess({ area, children }: { area: AccessArea; children: ReactNode }) {
+export function RequireAccess({
+  area,
+  permission,
+  children,
+}: {
+  area?: AccessArea;
+  permission?: CaregiverPermission;
+  children: ReactNode;
+}) {
   const access = useAccess();
 
   if (access.isPending) {
@@ -88,7 +129,10 @@ export function RequireAccess({ area, children }: { area: AccessArea; children: 
     );
   }
 
-  if (!access.data?.can(area)) {
+  const allowedArea = area ? access.data?.can(area) : true;
+  const allowedPermission = permission ? access.data?.canPermission(permission) : true;
+
+  if (!allowedArea || !allowedPermission) {
     return (
       <div className="surface-card mt-8 flex flex-col items-center gap-4 p-10 text-center">
         <span className="flex size-12 items-center justify-center rounded-full bg-destructive/10 text-destructive">
@@ -97,8 +141,7 @@ export function RequireAccess({ area, children }: { area: AccessArea; children: 
         <div>
           <h2 className="font-display text-xl font-semibold text-foreground">You don&apos;t have access here</h2>
           <p className="mt-2 max-w-md text-sm leading-relaxed text-muted-foreground">
-            This area is limited to account owners and caregivers who have been given permission. Ask the person you
-            care for to invite you or update your permissions.
+            This area or action is limited. Ask the account owner to update your caregiver permissions.
           </p>
         </div>
         <Button asChild variant="outline">

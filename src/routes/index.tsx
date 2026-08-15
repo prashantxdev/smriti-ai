@@ -38,7 +38,11 @@ export const Route = createFileRoute("/")({
 
 const LOOP = [
   { icon: Camera, title: "See", copy: "Point the camera at a person, object or room." },
-  { icon: Brain, title: "Understand", copy: "Smriti reads the scene and matches it to your world." },
+  {
+    icon: Brain,
+    title: "Understand",
+    copy: "Smriti reads the scene and matches it to your world.",
+  },
   { icon: Sparkles, title: "Remember", copy: "Every moment becomes a searchable memory." },
   { icon: MessageCircleHeart, title: "Connect", copy: "Ask a question, get a warm, plain answer." },
 ];
@@ -52,7 +56,7 @@ const FEATURES = [
   {
     icon: Search,
     title: "Search the way you remember",
-    copy: "\"family dinner\", \"last Sunday\", \"hospital\" — semantic search finds the moment, not just the word.",
+    copy: '"family dinner", "last Sunday", "hospital" — semantic search finds the moment, not just the word.',
   },
   {
     icon: Users,
@@ -109,7 +113,12 @@ function Landing() {
                     Get Started
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="outline" className="h-13 rounded-full px-8 text-base">
+                <Button
+                  asChild
+                  size="lg"
+                  variant="outline"
+                  className="h-13 rounded-full px-8 text-base"
+                >
                   <a href="#how-it-works">Explore Smriti AI</a>
                 </Button>
               </div>
@@ -141,7 +150,9 @@ function Landing() {
                   <p className="mt-5 text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                     Step {i + 1}
                   </p>
-                  <h3 className="mt-1 font-display text-xl font-semibold text-foreground">{step.title}</h3>
+                  <h3 className="mt-1 font-display text-xl font-semibold text-foreground">
+                    {step.title}
+                  </h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{step.copy}</p>
                 </li>
               ))}
@@ -155,15 +166,21 @@ function Landing() {
             Everything a memory companion should do
           </h2>
           <p className="mt-3 max-w-2xl text-muted-foreground">
-            Vision, memory and conversation working together — designed to feel human, never clinical.
+            Vision, memory and conversation working together — designed to feel human, never
+            clinical.
           </p>
           <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
             {FEATURES.map((f) => (
-              <article key={f.title} className="surface-card p-7 transition-shadow hover:shadow-lift">
+              <article
+                key={f.title}
+                className="surface-card p-7 transition-shadow hover:shadow-lift"
+              >
                 <span className="flex size-11 items-center justify-center rounded-xl bg-primary/10 text-primary">
                   <f.icon className="size-5" />
                 </span>
-                <h3 className="mt-5 font-display text-lg font-semibold text-foreground">{f.title}</h3>
+                <h3 className="mt-5 font-display text-lg font-semibold text-foreground">
+                  {f.title}
+                </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{f.copy}</p>
               </article>
             ))}
@@ -178,9 +195,9 @@ function Landing() {
                 Families care together
               </h2>
               <p className="mt-4 leading-relaxed text-muted-foreground">
-                A caregiver can add the people who visit, keep important information current and see how the
-                day went — but only with the permissions the person themselves granted. Trust is a setting,
-                not an assumption.
+                A caregiver can add the people who visit, keep important information current and see
+                how the day went — but only with the permissions the person themselves granted.
+                Trust is a setting, not an assumption.
               </p>
               <ul className="mt-6 space-y-3 text-sm text-muted-foreground">
                 {[
@@ -213,8 +230,8 @@ function Landing() {
             Start remembering what matters
           </h2>
           <p className="mt-4 text-muted-foreground">
-            Set up your memory library in a few minutes. Add the people you love, and let Smriti hold the
-            details for you.
+            Set up your memory library in a few minutes. Add the people you love, and let Smriti
+            hold the details for you.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button asChild size="lg" className="h-13 rounded-full px-8 text-base">
@@ -249,7 +266,7 @@ function RecognitionVisual() {
           <span>Recognising…</span>
         </div>
 
-        <div className="relative mt-5 aspect-[4/3] overflow-hidden rounded-2xl bg-linear-to-br from-navy via-primary to-purple">
+        <div className="relative mt-5 aspect-4/3 overflow-hidden rounded-2xl bg-linear-to-br from-navy via-primary to-purple">
           <div className="absolute inset-0 aurora opacity-60" aria-hidden />
           {/* face frame */}
           <div className="absolute left-1/2 top-1/2 size-36 -translate-x-1/2 -translate-y-1/2 rounded-2xl border-2 border-background/70">

@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      activity_logs: {
+        Row: {
+          action: string
+          actor_id: string
+          created_at: string
+          id: string
+          metadata: Json
+          patient_id: string
+          resource_id: string | null
+          resource_type: string
+        }
+        Insert: {
+          action: string
+          actor_id: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          patient_id: string
+          resource_id?: string | null
+          resource_type: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string
+          created_at?: string
+          id?: string
+          metadata?: Json
+          patient_id?: string
+          resource_id?: string | null
+          resource_type?: string
+        }
+        Relationships: []
+      }
       caregiver_permissions: {
         Row: {
           caregiver_link_id: string
@@ -518,7 +551,7 @@ export type Database = {
         | "DELETE_MEMORIES"
         | "MANAGE_PEOPLE"
         | "VIEW_ACTIVITY"
-      caregiver_status: "pending" | "accepted" | "revoked"
+      caregiver_status: "pending" | "accepted" | "declined" | "revoked"
       importance_level: "low" | "medium" | "high" | "critical"
       memory_type:
         | "person"

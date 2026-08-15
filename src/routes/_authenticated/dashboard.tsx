@@ -1,8 +1,10 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { Camera, Images, MessageCircleHeart, Users } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Camera, Images, MessageCircleHeart, Sparkles, Users } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/app/PageHeader";
+import { OnboardingModal } from "@/components/app/OnboardingModal";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -25,6 +27,20 @@ const QUICK_ACTIONS = [
 ] as const;
 
 function Dashboard() {
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
+
+  useEffect(() => {
+    const done = localStorage.getItem("smriti_onboarding_done");
+    if (!done) {
+      setOnboardingOpen(true);
+    }
+  }, []);
+
+  function handleCompleteOnboarding() {
+    localStorage.setItem("smriti_onboarding_done", "true");
+    setOnboardingOpen(false);
+  }
+
   const counts = useQuery({
     queryKey: ["dashboard", "counts"],
     queryFn: async () => {
@@ -44,10 +60,10 @@ function Dashboard() {
   });
 
   const stats = [
-    { label: "People", value: counts.data?.people },
-    { label: "Memories", value: counts.data?.memories },
-    { label: "Places", value: counts.data?.places },
-    { label: "Objects", value: counts.data?.objects },
+    { label: "People", value: counts.data?.people, to: "/people" },
+    { label: "Memories", value: counts.data?.memories, to: "/memories" },
+    { label: "Places", value: counts.data?.places, to: "/places" },
+    { label: "Objects", value: counts.data?.objects, to: "/objects" },
   ];
 
   return (
@@ -55,11 +71,22 @@ function Dashboard() {
       <PageHeader
         title="Today"
         description="A calm summary of your memory library, and the quickest ways to add to it."
+        action={
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setOnboardingOpen(true)}
+            className="rounded-full gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+          >
+            <Sparkles className="size-3.5 text-primary" />
+            Quick Tour
+          </Button>
+        }
       />
 
       <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
-          <div key={stat.label} className="surface-card p-5">
+          <Link key={stat.label} to={stat.to} className="surface-card p-5 transition-shadow hover:shadow-lift">
             <p className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
               {stat.label}
             </p>
@@ -68,7 +95,7 @@ function Dashboard() {
             ) : (
               <p className="mt-2 font-display text-3xl font-semibold text-foreground">{stat.value ?? 0}</p>
             )}
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -104,6 +131,12 @@ function Dashboard() {
           <Link to="/caregivers">Manage caregivers</Link>
         </Button>
       </div>
+
+      <OnboardingModal
+        open={onboardingOpen}
+        onOpenChange={setOnboardingOpen}
+        onComplete={handleCompleteOnboarding}
+      />
     </div>
   );
 }

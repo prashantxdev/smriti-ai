@@ -1,10 +1,11 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Logo } from "@/components/brand/Logo";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,18 +22,22 @@ function sanitizeRedirect(value: unknown): string | undefined {
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
-    mode: search['mode'] === "signup" ? "signup" : "signin",
-    redirect: sanitizeRedirect(search['redirect']),
+    mode: search["mode"] === "signup" ? "signup" : "signin",
+    redirect: sanitizeRedirect(search["redirect"]),
   }),
   head: () => ({
     meta: [
       { title: "Sign in to Smriti AI" },
       {
         name: "description",
-        content: "Sign in or create your Smriti AI account to start building a memory library that remembers what matters.",
+        content:
+          "Sign in or create your Smriti AI account to start building a memory library that remembers what matters.",
       },
       { property: "og:title", content: "Sign in to Smriti AI" },
-      { property: "og:description", content: "Create your Smriti AI account and start your memory library." },
+      {
+        property: "og:description",
+        content: "Create your Smriti AI account and start your memory library.",
+      },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -47,30 +52,95 @@ function AuthPage() {
   const [fullName, setFullName] = useState("");
   const [busy, setBusy] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [verifying, setVerifying] = useState(false);
+  const [verificationError, setVerificationError] = useState<string | null>(null);
+  const [verificationSuccess, setVerificationSuccess] = useState(false);
 
   const destination = redirect ?? "/dashboard";
   const isSignup = mode === "signup";
 
+  // Handle email confirmation callback from Supabase
+  useEffect(() => {
+    let active = true;
+
+    async function handleEmailConfirmation() {
+      // Get the hash fragment from the URL (contains code and type)
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const code = hashParams.get("code");
+      const type = hashParams.get("type");
+
+      if (!code || !type) {
+        return;
+      }
+
+      setVerifying(true);
+      setVerificationError(null);
+
+      try {
+        // Verify the OTP code from the email link
+        const { error } = await supabase.auth.verifyOtp({
+          type: type as "email" | "sms" | "recovery" | "recovery_recovery" | "signup" | "magiclink",
+          token: code,
+          email: email || undefined,
+        });
+
+        if (error) {
+          if (active) {
+            setVerificationError(error.message || "Failed to verify email. Please try again.");
+            toast.error(error.message || "Email verification failed");
+          }
+        } else {
+          if (active) {
+            setVerificationSuccess(true);
+            toast.success("Email verified! You can now sign in.");
+            // Give user a moment to see the success message
+            setTimeout(() => {
+              void navigate({ to: destination, replace: true });
+            }, 1500);
+          }
+        }
+      } catch (error) {
+        if (active) {
+          const message = error instanceof Error ? error.message : "An unexpected error occurred";
+          setVerificationError(message);
+          toast.error(message);
+        }
+      } finally {
+        if (active) {
+          setVerifying(false);
+        }
+      }
+    }
+
+    void handleEmailConfirmation();
+    return () => {
+      active = false;
+    };
+  }, [navigate, destination]);
+
+  // Check if user is already signed in
   useEffect(() => {
     let active = true;
     void supabase.auth.getSession().then(({ data }) => {
-      if (active && data.session) void navigate({ to: destination, replace: true });
+      if (active && data.session && !verifying) void navigate({ to: destination, replace: true });
     });
     return () => {
       active = false;
     };
-  }, [destination, navigate]);
+  }, [destination, navigate, verifying]);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setBusy(true);
+    setVerificationError(null);
     try {
       if (isSignup) {
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            // Redirect back to /auth so we can handle the email confirmation callback
+            emailRedirectTo: `${window.location.origin}/auth`,
             data: { full_name: fullName },
           },
         });
@@ -85,7 +155,10 @@ function AuthPage() {
       }
       await navigate({ to: destination, replace: true });
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Something went wrong. Please try again.");
+      const message =
+        error instanceof Error ? error.message : "Something went wrong. Please try again.";
+      setVerificationError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -120,12 +193,54 @@ function AuthPage() {
         </div>
 
         <div className="surface-card mt-8 p-7 shadow-lift">
-          {emailSent ? (
+          {verifying ? (
             <div className="text-center">
-              <h1 className="font-display text-2xl font-semibold text-foreground">Check your email</h1>
+              <h1 className="font-display text-2xl font-semibold text-foreground">
+                Verifying your email...
+              </h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                We sent a confirmation link to <span className="font-medium text-foreground">{email}</span>.
-                Open it to finish creating your Smriti AI account.
+                Please wait while we confirm your email address.
+              </p>
+              <div className="mt-6 flex justify-center">
+                <Loader2 className="size-6 animate-spin text-primary" />
+              </div>
+            </div>
+          ) : verificationSuccess ? (
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-foreground">
+                Email verified!
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                Your account is ready. Redirecting you now...
+              </p>
+              <div className="mt-6 flex justify-center">
+                <Loader2 className="size-6 animate-spin text-primary" />
+              </div>
+            </div>
+          ) : verificationError ? (
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-foreground">
+                Verification failed
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                {verificationError}
+              </p>
+              <Button asChild variant="default" className="mt-6 rounded-full">
+                <Link to="/auth?mode=signin">Try signing in</Link>
+              </Button>
+            </div>
+          ) : emailSent ? (
+            <div className="text-center">
+              <h1 className="font-display text-2xl font-semibold text-foreground">
+                Check your email
+              </h1>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
+                We sent a confirmation link to{" "}
+                <span className="font-medium text-foreground">{email}</span>. Open it to finish
+                creating your Smriti AI account.
+              </p>
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                💡 Tip: Check your spam or promotions folder if you don't see the email.
               </p>
               <Button asChild variant="ghost" className="mt-6 rounded-full">
                 <Link to="/">Back to home</Link>
@@ -141,6 +256,13 @@ function AuthPage() {
                   ? "A few details, and your memory library is ready."
                   : "Sign in to continue where you left off."}
               </p>
+
+              {verificationError && (
+                <Alert variant="destructive" className="mt-4">
+                  <AlertCircle className="size-4" />
+                  <AlertDescription>{verificationError}</AlertDescription>
+                </Alert>
+              )}
 
               <Button
                 type="button"
