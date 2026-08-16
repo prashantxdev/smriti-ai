@@ -1,7 +1,4 @@
-import { createLovableAuth } from "@lovable.dev/cloud-auth-js";
 import { supabase } from "../supabase/client";
-
-const authClient = createLovableAuth();
 
 type SignInOptions = {
   redirect_uri?: string;
@@ -11,27 +8,14 @@ type SignInOptions = {
 export const smritiAuth = {
   auth: {
     signInWithOAuth: async (provider: "google" | "apple" | "microsoft", opts?: SignInOptions) => {
-      const result = await authClient.signInWithOAuth(provider, {
-        ...opts,
-        extraParams: {
-          ...opts?.extraParams,
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: provider === "google" ? "google" : provider,
+        options: {
+          redirectTo: opts?.redirect_uri || window.location.origin,
         },
       });
-
-      if (result.redirected) {
-        return result;
-      }
-
-      if (result.error) {
-        return result;
-      }
-
-      try {
-        await supabase.auth.setSession(result.tokens);
-      } catch (e) {
-        return { error: e instanceof Error ? e : new Error(String(e)) };
-      }
-      return result;
+      return { data, error };
     },
   },
 };
+

@@ -19,9 +19,11 @@ import { Route as AuthenticatedCaregiversRouteImport } from './routes/_authentic
 import { Route as AuthenticatedCompanionRouteImport } from './routes/_authenticated/companion'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedMemoriesRouteImport } from './routes/_authenticated/memories'
+import { Route as AuthenticatedNotificationsRouteImport } from './routes/_authenticated/notifications'
 import { Route as AuthenticatedObjectsRouteImport } from './routes/_authenticated/objects'
 import { Route as AuthenticatedPeopleRouteImport } from './routes/_authenticated/people'
 import { Route as AuthenticatedPlacesRouteImport } from './routes/_authenticated/places'
+import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as AuthenticatedRecogniseRouteImport } from './routes/_authenticated/recognise'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 
@@ -74,6 +76,12 @@ const AuthenticatedMemoriesRoute = AuthenticatedMemoriesRouteImport.update({
   path: '/memories',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedNotificationsRoute =
+  AuthenticatedNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedObjectsRoute = AuthenticatedObjectsRouteImport.update({
   id: '/objects',
   path: '/objects',
@@ -87,6 +95,11 @@ const AuthenticatedPeopleRoute = AuthenticatedPeopleRouteImport.update({
 const AuthenticatedPlacesRoute = AuthenticatedPlacesRouteImport.update({
   id: '/places',
   path: '/places',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedRecogniseRoute = AuthenticatedRecogniseRouteImport.update({
@@ -110,9 +123,11 @@ export interface FileRoutesByFullPath {
   '/companion': typeof AuthenticatedCompanionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/memories': typeof AuthenticatedMemoriesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/objects': typeof AuthenticatedObjectsRoute
   '/people': typeof AuthenticatedPeopleRoute
   '/places': typeof AuthenticatedPlacesRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/recognise': typeof AuthenticatedRecogniseRoute
   '/settings': typeof AuthenticatedSettingsRoute
 }
@@ -126,9 +141,11 @@ export interface FileRoutesByTo {
   '/companion': typeof AuthenticatedCompanionRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/memories': typeof AuthenticatedMemoriesRoute
+  '/notifications': typeof AuthenticatedNotificationsRoute
   '/objects': typeof AuthenticatedObjectsRoute
   '/people': typeof AuthenticatedPeopleRoute
   '/places': typeof AuthenticatedPlacesRoute
+  '/profile': typeof AuthenticatedProfileRoute
   '/recognise': typeof AuthenticatedRecogniseRoute
   '/settings': typeof AuthenticatedSettingsRoute
 }
@@ -144,9 +161,11 @@ export interface FileRoutesById {
   '/_authenticated/companion': typeof AuthenticatedCompanionRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/memories': typeof AuthenticatedMemoriesRoute
+  '/_authenticated/notifications': typeof AuthenticatedNotificationsRoute
   '/_authenticated/objects': typeof AuthenticatedObjectsRoute
   '/_authenticated/people': typeof AuthenticatedPeopleRoute
   '/_authenticated/places': typeof AuthenticatedPlacesRoute
+  '/_authenticated/profile': typeof AuthenticatedProfileRoute
   '/_authenticated/recognise': typeof AuthenticatedRecogniseRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
 }
@@ -162,9 +181,11 @@ export interface FileRouteTypes {
     | '/companion'
     | '/dashboard'
     | '/memories'
+    | '/notifications'
     | '/objects'
     | '/people'
     | '/places'
+    | '/profile'
     | '/recognise'
     | '/settings'
   fileRoutesByTo: FileRoutesByTo
@@ -178,9 +199,11 @@ export interface FileRouteTypes {
     | '/companion'
     | '/dashboard'
     | '/memories'
+    | '/notifications'
     | '/objects'
     | '/people'
     | '/places'
+    | '/profile'
     | '/recognise'
     | '/settings'
   id:
@@ -195,9 +218,11 @@ export interface FileRouteTypes {
     | '/_authenticated/companion'
     | '/_authenticated/dashboard'
     | '/_authenticated/memories'
+    | '/_authenticated/notifications'
     | '/_authenticated/objects'
     | '/_authenticated/people'
     | '/_authenticated/places'
+    | '/_authenticated/profile'
     | '/_authenticated/recognise'
     | '/_authenticated/settings'
   fileRoutesById: FileRoutesById
@@ -283,6 +308,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedMemoriesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/notifications': {
+      id: '/_authenticated/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AuthenticatedNotificationsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/objects': {
       id: '/_authenticated/objects'
       path: '/objects'
@@ -302,6 +334,13 @@ declare module '@tanstack/react-router' {
       path: '/places'
       fullPath: '/places'
       preLoaderRoute: typeof AuthenticatedPlacesRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/profile': {
+      id: '/_authenticated/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/recognise': {
@@ -326,9 +365,11 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCompanionRoute: typeof AuthenticatedCompanionRoute
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedMemoriesRoute: typeof AuthenticatedMemoriesRoute
+  AuthenticatedNotificationsRoute: typeof AuthenticatedNotificationsRoute
   AuthenticatedObjectsRoute: typeof AuthenticatedObjectsRoute
   AuthenticatedPeopleRoute: typeof AuthenticatedPeopleRoute
   AuthenticatedPlacesRoute: typeof AuthenticatedPlacesRoute
+  AuthenticatedProfileRoute: typeof AuthenticatedProfileRoute
   AuthenticatedRecogniseRoute: typeof AuthenticatedRecogniseRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
 }
@@ -338,9 +379,11 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCompanionRoute: AuthenticatedCompanionRoute,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedMemoriesRoute: AuthenticatedMemoriesRoute,
+  AuthenticatedNotificationsRoute: AuthenticatedNotificationsRoute,
   AuthenticatedObjectsRoute: AuthenticatedObjectsRoute,
   AuthenticatedPeopleRoute: AuthenticatedPeopleRoute,
   AuthenticatedPlacesRoute: AuthenticatedPlacesRoute,
+  AuthenticatedProfileRoute: AuthenticatedProfileRoute,
   AuthenticatedRecogniseRoute: AuthenticatedRecogniseRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
 }

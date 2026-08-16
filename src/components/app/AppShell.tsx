@@ -12,6 +12,8 @@ import {
   MessageCircleHeart,
   Package,
   Settings,
+  ShieldCheck,
+  User,
   Users,
 } from "lucide-react";
 import { Logo } from "@/components/brand/Logo";
@@ -39,7 +41,8 @@ export const APP_NAV = [
   { to: "/people", label: "People", icon: Users },
   { to: "/places", label: "Places", icon: MapPin },
   { to: "/objects", label: "Objects", icon: Package },
-  { to: "/caregivers", label: "Caregivers", icon: Bell, area: "caregivers" },
+  { to: "/caregivers", label: "Caregivers", icon: ShieldCheck, area: "caregivers" },
+  { to: "/notifications", label: "Notifications", icon: Bell },
   { to: "/settings", label: "Settings", icon: Settings, area: "settings" },
 ] as const;
 
@@ -190,6 +193,12 @@ function AppHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
         <div className="hidden lg:block" />
 
         <div className="flex items-center gap-2">
+          <Button asChild variant="ghost" size="icon" className="relative rounded-full" aria-label="Notifications">
+            <Link to="/notifications">
+              <Bell className="size-4" />
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-primary" />
+            </Link>
+          </Button>
           <ThemeToggle />
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -204,6 +213,12 @@ function AppHeader({ onOpenMenu }: { onOpenMenu: () => void }) {
                 {email ?? "Signed in"}
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link to="/profile">
+                  <User className="size-4" />
+                  Profile
+                </Link>
+              </DropdownMenuItem>
               {access.data?.can("settings") ? (
                 <DropdownMenuItem asChild>
                   <Link to="/settings">

@@ -3,14 +3,13 @@ import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
-import { smritiAuth } from "@/integrations/smriti/index";
 import { Logo } from "@/components/brand/Logo";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type Mode = "signin" | "signup";
+type Mode = "signin" | "signup" | "forgot";
 
 type AuthSearch = { mode?: Mode; redirect?: string | undefined };
 
@@ -22,7 +21,12 @@ function sanitizeRedirect(value: unknown): string | undefined {
 
 export const Route = createFileRoute("/auth")({
   validateSearch: (search: Record<string, unknown>): AuthSearch => ({
-    mode: search["mode"] === "signup" ? "signup" : "signin",
+    mode:
+      search["mode"] === "signup"
+        ? "signup"
+        : search["mode"] === "forgot"
+          ? "forgot"
+          : "signin",
     redirect: sanitizeRedirect(search["redirect"]),
   }),
   head: () => ({
@@ -58,6 +62,7 @@ function AuthPage() {
 
   const destination = redirect ?? "/dashboard";
   const isSignup = mode === "signup";
+  const isForgot = mode === "forgot";
 
   // Handle email confirmation callback from Supabase
   useEffect(() => {
@@ -121,7 +126,7 @@ function AuthPage() {
     return () => {
       active = false;
     };
-  }, [navigate, destination]);
+  }, [navigate, destination, email]);
 
   // Check if user is already signed in
   useEffect(() => {
@@ -139,6 +144,16 @@ function AuthPage() {
     setBusy(true);
     setVerificationError(null);
     try {
+      if (isForgot) {
+        const { error } = await supabase.auth.resetPasswordForEmail(email, {
+          redirectTo: `${window.location.origin}/auth?mode=signin`,
+        });
+        if (error) throw error;
+        setEmailSent(true);
+        toast.success("Password reset link sent to your email!");
+        return;
+      }
+
       if (isSignup) {
         const { data, error } = await supabase.auth.signUp({
           email,
@@ -171,16 +186,22 @@ function AuthPage() {
 
   async function handleGoogle() {
     setBusy(true);
+    setVerificationError(null);
     try {
-      const result = await smritiAuth.auth.signInWithOAuth("google", {
-        redirect_uri: window.location.origin,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: window.location.origin,
+        },
       });
-      if (result.error) {
-        toast.error("Google sign-in didn't work. Please try again.");
-        return;
+      if (error) {
+        setVerificationError(error.message || "Google sign-in failed. Please try again.");
+        toast.error(error.message || "Google sign-in failed. Please try again.");
       }
-      if (result.redirected) return;
-      await navigate({ to: destination, replace: true });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "An unexpected error occurred during Google sign-in";
+      setVerificationError(message);
+      toast.error(message);
     } finally {
       setBusy(false);
     }
@@ -237,27 +258,29 @@ function AuthPage() {
           ) : emailSent ? (
             <div className="text-center">
               <h1 className="font-display text-2xl font-semibold text-foreground">
-                Check your email
+                {isForgot ? "Check your email" : "Check your inbox"}
               </h1>
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
-                We sent a confirmation link to{" "}
-                <span className="font-medium text-foreground">{email}</span>. Open it to finish
-                creating your Smriti AI account.
+                {isForgot
+                  ? `We sent password reset instructions to ${email}.`
+                  : `We sent a confirmation link to ${email}. Open it to finish creating your Smriti AI account.`}
               </p>
               <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
                 💡 Tip: Check your spam or promotions folder if you don't see the email.
               </p>
               <Button asChild variant="ghost" className="mt-6 rounded-full">
-                <Link to="/">Back to home</Link>
+                <Link to="/auth" search={{ mode: "signin" }}>Back to sign in</Link>
               </Button>
             </div>
           ) : (
             <>
               <h1 className="font-display text-2xl font-semibold text-foreground">
-                {isSignup ? "Create your account" : "Welcome back"}
+                {isForgot ? "Reset your password" : isSignup ? "Create your account" : "Welcome back"}
               </h1>
               <p className="mt-2 text-sm text-muted-foreground">
-                {isSignup
+                {isForgot
+                  ? "Enter your account email to receive a password reset link."
+                  : isSignup
                   ? "A few details, and your memory library is ready."
                   : "Sign in to continue where you left off."}
               </p>
@@ -269,24 +292,28 @@ function AuthPage() {
                 </Alert>
               )}
 
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleGoogle}
-                disabled={busy}
-                className="mt-6 h-12 w-full rounded-xl text-base"
-              >
-                <GoogleMark />
-                Continue with Google
-              </Button>
+              {!isForgot && (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleGoogle}
+                    disabled={busy}
+                    className="mt-6 h-12 w-full rounded-xl text-base"
+                  >
+                    <GoogleMark />
+                    Continue with Google
+                  </Button>
 
-              <div className="my-6 flex items-center gap-4">
-                <span className="h-px flex-1 bg-border" />
-                <span className="text-xs tracking-wide text-muted-foreground uppercase">or</span>
-                <span className="h-px flex-1 bg-border" />
-              </div>
+                  <div className="my-6 flex items-center gap-4">
+                    <span className="h-px flex-1 bg-border" />
+                    <span className="text-xs tracking-wide text-muted-foreground uppercase">or</span>
+                    <span className="h-px flex-1 bg-border" />
+                  </div>
+                </>
+              )}
 
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form onSubmit={handleSubmit} className="mt-6 space-y-4">
                 {isSignup && (
                   <div className="space-y-2">
                     <Label htmlFor="fullName">Your name</Label>
@@ -314,36 +341,73 @@ function AuthPage() {
                     placeholder="you@example.com"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete={isSignup ? "new-password" : "current-password"}
-                    required
-                    minLength={8}
-                    className="h-12"
-                    placeholder={isSignup ? "At least 8 characters" : "••••••••"}
-                  />
-                </div>
+
+                {!isForgot && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label htmlFor="password">Password</Label>
+                      {!isSignup && (
+                        <Link
+                          to="/auth"
+                          search={{ mode: "forgot", redirect }}
+                          className="text-xs text-primary hover:underline"
+                        >
+                          Forgot password?
+                        </Link>
+                      )}
+                    </div>
+                    <Input
+                      id="password"
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      autoComplete={isSignup ? "new-password" : "current-password"}
+                      required
+                      minLength={8}
+                      className="h-12"
+                      placeholder={isSignup ? "At least 8 characters" : "••••••••"}
+                    />
+                  </div>
+                )}
 
                 <Button type="submit" disabled={busy} className="h-12 w-full rounded-xl text-base">
                   {busy && <Loader2 className="size-4 animate-spin" />}
-                  {isSignup ? "Create account" : "Sign in"}
+                  {isForgot ? "Send reset link" : isSignup ? "Create account" : "Sign in"}
                 </Button>
               </form>
 
               <p className="mt-6 text-center text-sm text-muted-foreground">
-                {isSignup ? "Already have an account?" : "New to Smriti AI?"}{" "}
-                <Link
-                  to="/auth"
-                  search={{ mode: isSignup ? "signin" : "signup", redirect }}
-                  className="font-medium text-primary underline-offset-4 hover:underline"
-                >
-                  {isSignup ? "Sign in" : "Create one"}
-                </Link>
+                {isForgot ? (
+                  <Link
+                    to="/auth"
+                    search={{ mode: "signin", redirect }}
+                    className="font-medium text-primary underline-offset-4 hover:underline"
+                  >
+                    Back to sign in
+                  </Link>
+                ) : isSignup ? (
+                  <>
+                    Already have an account?{" "}
+                    <Link
+                      to="/auth"
+                      search={{ mode: "signin", redirect }}
+                      className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      Sign in
+                    </Link>
+                  </>
+                ) : (
+                  <>
+                    New to Smriti AI?{" "}
+                    <Link
+                      to="/auth"
+                      search={{ mode: "signup", redirect }}
+                      className="font-medium text-primary underline-offset-4 hover:underline"
+                    >
+                      Create one
+                    </Link>
+                  </>
+                )}
               </p>
             </>
           )}

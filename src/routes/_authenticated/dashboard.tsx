@@ -59,6 +59,32 @@ function Dashboard() {
     },
   });
 
+  const recentMemories = useQuery({
+    queryKey: ["dashboard", "recent-memories"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("memories")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const recentActivity = useQuery({
+    queryKey: ["dashboard", "recent-activity"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("activity_logs")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
   const stats = [
     { label: "People", value: counts.data?.people, to: "/people" },
     { label: "Memories", value: counts.data?.memories, to: "/memories" },
@@ -84,6 +110,7 @@ function Dashboard() {
         }
       />
 
+      {/* Stats Cards */}
       <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
         {stats.map((stat) => (
           <Link key={stat.label} to={stat.to} className="surface-card p-5 transition-shadow hover:shadow-lift">
@@ -99,6 +126,7 @@ function Dashboard() {
         ))}
       </div>
 
+      {/* Quick actions */}
       <h2 className="mt-12 font-display text-xl font-semibold text-foreground">Quick actions</h2>
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         {QUICK_ACTIONS.map((action) => (
@@ -120,6 +148,79 @@ function Dashboard() {
         ))}
       </div>
 
+      {/* Recent Memories Section */}
+      <div className="mt-12">
+        <div className="flex items-center justify-between">
+          <h2 className="font-display text-xl font-semibold text-foreground">Recent Memories</h2>
+          <Link to="/memories" className="text-xs font-semibold text-primary hover:underline">
+            View all memories →
+          </Link>
+        </div>
+
+        {recentMemories.isPending ? (
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <Skeleton className="h-36 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl" />
+            <Skeleton className="h-36 rounded-2xl" />
+          </div>
+        ) : (recentMemories.data ?? []).length === 0 ? (
+          <div className="surface-card mt-4 p-6 text-center">
+            <p className="text-sm text-muted-foreground">No recent memories added yet.</p>
+            <Button asChild size="sm" className="mt-3 rounded-full text-xs">
+              <Link to="/memories">Add your first memory</Link>
+            </Button>
+          </div>
+        ) : (
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            {recentMemories.data?.map((mem) => (
+              <Link
+                key={mem.id}
+                to="/memories"
+                className="surface-card flex flex-col justify-between p-4 transition-all hover:shadow-soft"
+              >
+                <div>
+                  <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-primary">
+                    {mem.memory_type}
+                  </span>
+                  <h3 className="mt-1 font-display text-base font-semibold line-clamp-1">{mem.title}</h3>
+                  {mem.description && (
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{mem.description}</p>
+                  )}
+                </div>
+                <div className="mt-3 text-[0.7rem] text-muted-foreground">
+                  {mem.event_date ? new Date(mem.event_date).toLocaleDateString() : "Saved recently"}
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Recent Activity Timeline Summary */}
+      {(recentActivity.data ?? []).length > 0 && (
+        <div className="mt-12">
+          <div className="flex items-center justify-between">
+            <h2 className="font-display text-xl font-semibold text-foreground">Recent Activity</h2>
+            <Link to="/settings" className="text-xs font-semibold text-primary hover:underline">
+              Full audit log →
+            </Link>
+          </div>
+          <div className="mt-4 space-y-2">
+            {recentActivity.data?.map((log) => (
+              <div key={log.id} className="surface-card flex items-center justify-between p-3.5 text-xs">
+                <span className="font-medium text-foreground">
+                  {log.action.replace(/_/g, " ").toUpperCase()}
+                </span>
+                <span className="text-muted-foreground">
+                  {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Caregiver Banner */}
       <div className="surface-card mt-12 flex flex-wrap items-center justify-between gap-4 p-6">
         <div>
           <h2 className="font-display text-lg font-semibold text-foreground">Invite someone you trust</h2>
